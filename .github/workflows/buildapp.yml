@@ -23,7 +23,7 @@ on:
         type: string
       decrypted_youtube_url:
         description: "Direct URL of the decrypted YouTube IPA"
-        default: ""
+        default: "https://archive.org/download/youtube-19.49.5-1736021665/YouTube_19.49.5.ipa"
         required: true
         type: string
       bundle_id:
