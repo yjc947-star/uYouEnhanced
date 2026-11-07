@@ -157,7 +157,7 @@ jobs:
       - name: Prepare YouTube iPA
         id: prepare_youtube
         run: |
-          curl -L -s -A "Mozilla/5.0" "$YOUTUBE_URL" -o main/YouTube.ipa
+          curl -f -L -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -H "Accept: */*" "$YOUTUBE_URL" -o main/YouTube.ipa
           cd main
           mv YouTube.ipa YouTube.zip
           unzip -q YouTube.zip
