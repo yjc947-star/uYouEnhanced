@@ -23,7 +23,7 @@ on:
         type: string
       decrypted_youtube_url:
         description: "Direct URL of the decrypted YouTube IPA"
-        default: "https://archive.org/download/youtube-19.49.5-1736021665/YouTube_19.49.5.ipa"
+        default: "https://github.com/qnblackcat/uYouPlus/releases/download/v19.08.2-3.0.3/YouTube_19.08.2_3.0.3.ipa"
         required: true
         type: string
       bundle_id:
@@ -154,14 +154,14 @@ jobs:
           echo ::add-mask::$URL_YT
           echo URL_YT=$URL_YT >> $GITHUB_ENV
 
-      - name: Prepare YouTube iPA
-        id: prepare_youtube
-        run: |
-          curl -f -L -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -H "Accept: */*" "$YOUTUBE_URL" -o main/YouTube.ipa
-          cd main
-          mv YouTube.ipa YouTube.zip
-          unzip -q YouTube.zip
-          youtube_version=$(defaults read "$(pwd)/Payload/YouTube.app/Info" CFBundleVersion)
+      - name:name: Prepare YouTube iPA
+      id: prepare_youtube
+      run: |
+        curl -L -s "$YOUTUBE_URL" -o main/YouTube.ipa
+        cd main
+        mv YouTube.ipa YouTube.zip
+        unzip -q YouTube.zip
+        youtube_version=$(defaults read "$(pwd)/Payload/YouTube.app/Info" CFBundleVersion)
           echo "YT_VERSION=$youtube_version" >> $GITHUB_ENV
           echo "youtube_version=${youtube_version}" >> $GITHUB_OUTPUT
 
