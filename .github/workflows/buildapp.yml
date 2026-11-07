@@ -1,30 +1,27 @@
+---
 name: Build and Release uYouEnhanced
-
 on:
   workflow_dispatch:
     inputs:
       decrypted_youtube_url:
-        description: "Direct URL of the decrypted YouTube IPA"
-        default: "https://github.com/qnblackcat/uYouPlus/releases/download/v19.08.2-3.0.3/YouTube_19.08.2_3.0.3.ipa"
+        description: Direct URL of the decrypted YouTube IPA
+        default: https://github.com/qnblackcat/uYouPlus/releases/download/v19.08.2-3.0.3/YouTube_19.08.2_3.0.3.ipa
         required: true
         type: string
       create_release:
-        description: "Draft a new release"
+        description: Draft a new release
         default: true
         required: false
         type: boolean
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   build:
     name: Build uYouEnhanced
     runs-on: macos-latest
     permissions:
       contents: write
-
     steps:
       - name: Checkout Main
         uses: actions/checkout@v4
@@ -32,70 +29,86 @@ jobs:
           path: main
           ref: ${{ github.event.inputs.commit_id || github.ref }}
           submodules: recursive
-
       - name: Install Dependencies
-        run: |
-          brew install ldid dpkg make wget unzip jq pipx meson ninja gnu-sed autoconf automake libtool pkgconf pngquant
-
+        run: >
+          brew install ldid dpkg make wget unzip jq pipx meson ninja gnu-sed autoconf
+          automake libtool pkgconf pngquant
       - name: Set PATH
         run: echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH
-
       - name: Setup Theos
         uses: PeterL1n/setup-theos@main
-
       - name: Install Theos Jailed
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/qtc-de/theos-jailed/master/install.sh | bash
-
+        run: >
+          curl -fsSL
+          https://raw.githubusercontent.com/qtc-de/theos-jailed/master/install.sh
+          | bash
       - name: Fix Theos broken pipe issue
-        run: |
-          sed -i '' 's/printf "Patched: %#s\\n"/# printf "Patched: %#s\\n"/g' /usr/local/bin/tbd
+        run: >
+          sed -i '' 's/printf "Patched: %#s\\n"/# printf "Patched: %#s\\n"/g'
+          /usr/local/bin/tbd
+
           sed -i '' 's/echo "Broken pipe fixes applied"/# echo "Broken pipe fixes applied"/g' /usr/local/bin/tbd
-
       - name: Install cyan and tbd
-        run: |
+        run: >
           pipx install https://github.com/asdfreczbn/pyzule-rw/archive/main.zip
-          curl -sL "https://github.com/inoahdev/tbd/releases/download/3.2/tbd-mac" -o /usr/local/bin/tbd
-          chmod +x /usr/local/bin/tbd
 
+          curl -sL "https://github.com/inoahdev/tbd/releases/download/3.2/tbd-mac" -o /usr/local/bin/tbd
+
+          chmod +x /usr/local/bin/tbd
       - name: Hash YT ipa url
         run: |
           YT_URL="${{ inputs.decrypted_youtube_url }}"
           echo "::add-mask::$YT_URL"
           echo "URL_YT=$YT_URL" >> $GITHUB_ENV
-
       - name: Prepare YouTube iPA
-        run: |
-          curl -f -L -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -H "Accept: */*" "$YOUTUBE_URL" -o main/YouTube.ipa
+        run: >
+          curl -f -L -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+          AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          -H "Accept: */*" "$YOUTUBE_URL" -o main/YouTube.ipa
+
           cd main
+
           mv YouTube.ipa YouTube.zip
+
           unzip -q YouTube.zip
+
           be_version=$(defaults read "$(pwd)/Payload/YouTube.app/Info" CFBundleVersion)
+
           echo "YT_VERSION=$be_version" >> $GITHUB_ENV
+
           echo "youtube_version=${be_version}" >> $GITHUB_OUTPUT
       - name: Fix Theos broken pipe issue
-        run: |
-          sed -i '' 's/printf "Patched: %#s\\n"/# printf "Patched: %#s\\n"/g' /usr/local/bin/tbd
+        run: >
+          sed -i '' 's/printf "Patched: %#s\\n"/# printf "Patched: %#s\\n"/g'
+          /usr/local/bin/tbd
+
           sed -i '' 's/echo "Broken pipe fixes applied"/# echo "Broken pipe fixes applied"/g' /usr/local/bin/tbd
-
       - name: Install cyan and tbd
-        run: |
+        run: >
           pipx install https://github.com/asdfreczbn/pyzule-rw/archive/main.zip
-          curl -sL "https://github.com/inoahdev/tbd/releases/download/3.2/tbd-mac" -o /usr/local/bin/tbd
-          chmod +x /usr/local/bin/tbd
 
+          curl -sL "https://github.com/inoahdev/tbd/releases/download/3.2/tbd-mac" -o /usr/local/bin/tbd
+
+          chmod +x /usr/local/bin/tbd
       - name: Hash YT ipa url
         run: |
           YT_URL="${{ inputs.decrypted_youtube_url }}"
           echo "::add-mask::$YT_URL"
           echo "URL_YT=$YT_URL" >> $GITHUB_ENV
-
       - name: Prepare YouTube iPA
         run: |
-          curl -f -L -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -H "Accept: */*" "$YOUTUBE_URL" -o main/YouTube.ipa
+          curl -f -L -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+          AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+          -H "Accept: */*" "$YOUTUBE_URL" -o main/YouTube.ipa
+
           cd main
+
           mv YouTube.ipa YouTube.zip
+
           unzip -q YouTube.zip
+
           be_version=$(defaults read "$(pwd)/Payload/YouTube.app/Info" CFBundleVersion)
+
           echo "YT_VERSION=$be_version" >> $GITHUB_ENV
+
           echo "youtube_version=${be_version}" >> $GITHUB_OUTPUT
