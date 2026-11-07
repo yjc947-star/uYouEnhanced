@@ -73,3 +73,29 @@ jobs:
           be_version=$(defaults read "$(pwd)/Payload/YouTube.app/Info" CFBundleVersion)
           echo "YT_VERSION=$be_version" >> $GITHUB_ENV
           echo "youtube_version=${be_version}" >> $GITHUB_OUTPUT
+      - name: Fix Theos broken pipe issue
+        run: |
+          sed -i '' 's/printf "Patched: %#s\\n"/# printf "Patched: %#s\\n"/g' /usr/local/bin/tbd
+          sed -i '' 's/echo "Broken pipe fixes applied"/# echo "Broken pipe fixes applied"/g' /usr/local/bin/tbd
+
+      - name: Install cyan and tbd
+        run: |
+          pipx install https://github.com/asdfreczbn/pyzule-rw/archive/main.zip
+          curl -sL "https://github.com/inoahdev/tbd/releases/download/3.2/tbd-mac" -o /usr/local/bin/tbd
+          chmod +x /usr/local/bin/tbd
+
+      - name: Hash YT ipa url
+        run: |
+          YT_URL="${{ inputs.decrypted_youtube_url }}"
+          echo "::add-mask::$YT_URL"
+          echo "URL_YT=$YT_URL" >> $GITHUB_ENV
+
+      - name: Prepare YouTube iPA
+        run: |
+          curl -f -L -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -H "Accept: */*" "$YOUTUBE_URL" -o main/YouTube.ipa
+          cd main
+          mv YouTube.ipa YouTube.zip
+          unzip -q YouTube.zip
+          be_version=$(defaults read "$(pwd)/Payload/YouTube.app/Info" CFBundleVersion)
+          echo "YT_VERSION=$be_version" >> $GITHUB_ENV
+          echo "youtube_version=${be_version}" >> $GITHUB_OUTPUT
